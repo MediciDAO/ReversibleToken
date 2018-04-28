@@ -1,0 +1,39 @@
+{
+  "name": "medici",
+  "version": "0.0.0",
+  "description": "Reversible WETH",
+  "author": "Dean Eigenmann <dean@tokenate.io>",
+  "license": "GPL-3.0",
+  "scripts": {
+    "test": "truffle test",
+    "lint": "solium --dir ./contracts",
+    "coverage": "sh scripts/coverage.sh"
+  },
+  "files": [
+    "contracts/",
+    "truffle.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decanus/Medici.git"
+  },
+  "devDependencies": {
+    "solidity-coverage": "^0.3.5",
+    "solium": "^1.1.6",
+    "truffle": "^4.1.7",
+    "openzeppelin-solidity": "^1.9.0"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "smart",
+    "contracts"
+  ],
+  "dependencies": {
+    "ethereumjs-util": "^5.1.5",
+    "ganache-cli": "^6.1.0",
+    "testrpc": "0.0.1",
+    "web3-utils": "^1.0.0-beta.34",
+    "web3": "^1.0.0-beta.34"
+  }
+}
