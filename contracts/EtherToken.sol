@@ -9,7 +9,6 @@ contract EtherToken is StandardToken {
 
     function deposit() external payable {
         require(msg.value > 0);
-        totalSupply_.add(amount);
         balances[msg.sender] = balances[msg.sender].add(msg.value);
         emit Deposited(msg.sender, msg.value);
     }
@@ -17,10 +16,13 @@ contract EtherToken is StandardToken {
     function withdraw(uint amount) external {
         require(amount > 0);
 
-        totalSupply_.sub(amount);
         balances[msg.sender] = balances[msg.sender].sub(amount);
         msg.sender.transfer(amount);
 
         emit Withdrawn(msg.sender, amount);
+    }
+
+    function totalSupply() public view returns (uint256) {
+        return address(this).balance;
     }
 }
