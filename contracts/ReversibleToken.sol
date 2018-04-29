@@ -7,7 +7,7 @@ contract ReversibleToken is ERC20 {
 
     using SafeMath for uint;
 
-    struct Transfer {
+    struct Transaction {
         uint amount;
         uint timestamp;
         address to;
@@ -21,13 +21,13 @@ contract ReversibleToken is ERC20 {
 
     uint constant public REVERSIBLE_TIMEFRAME = 30 days;
 
-    mapping (uint => Transfer) public transfers;
+    Transaction[] public transfers;
     mapping (address => uint) private balances;
 
     event Reversed(uint transaction); // @todo more info
     event Confirmed(uint transaction);
 
-    function ReversibleToken(ERC20 _token) public {
+    constructor(ERC20 _token) public {
         token = _token;
     }
 
@@ -45,7 +45,7 @@ contract ReversibleToken is ERC20 {
         require(transfers[transaction].timestamp >= now + REVERSIBLE_TIMEFRAME);
         require(transfers[transaction].from == msg.sender);
 
-        Transfer transfer = transfers[transaction];
+        Transaction storage transfer = transfers[transaction];
 
         escrow = escrow.sub(transfer.amount);
         balances[transfer.from] = balances[transfer.from].add(transfer.amount);
@@ -56,14 +56,30 @@ contract ReversibleToken is ERC20 {
 
     function confirm(uint transaction) external {
         require(transfers[transaction].timestamp < now + REVERSIBLE_TIMEFRAME);
-        require(!transfer[transaction].confirmed);
+        require(!transfers[transaction].confirmed);
 
         transfers[transaction].confirmed = true;
 
-        Transfer transfer = transfers[transaction];
+        Transaction storage transfer = transfers[transaction];
         escrow = escrow.sub(transfer.amount);
         balances[transfer.to] = balances[transfer.to].add(transfer.amount);
         emit Confirmed(transaction);
     }
 
+    function transfer(address from, address to, uint amount) internal {
+        balances[from] = balances[from].sub(amount);
+        escrow = escrow.add(amount);
+
+        Transaction memory transfer = Transaction({
+            amount: amount,
+            timestamp: now,
+            to: to,
+            from: from,
+            confirmed: false
+        });
+
+        transfers.push(transfer);
+
+        emit Transfer(from, to, amount);
+    }
 }
