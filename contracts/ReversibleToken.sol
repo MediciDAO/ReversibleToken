@@ -7,9 +7,16 @@ contract ReversibleToken is ERC20 {
 
     using SafeMath for uint;
 
+    struct Transfer {
+        uint amount;
+        uint timestamp;
+        address to;
+    }
+
     ERC20 public token;
 
     mapping (address => uint) private balances;
+    mapping (uint => Transfer) private transfers;
 
     function ReversibleToken(ERC20 _token) public {
         token = _token;
