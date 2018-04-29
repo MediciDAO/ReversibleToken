@@ -11,12 +11,18 @@ contract ReversibleToken is ERC20 {
         uint amount;
         uint timestamp;
         address to;
+        address from;
+        bool confirmed;
     }
 
     ERC20 public token;
 
+    uint public escrow;
+
+    uint constant public REVERSIBLE_TIMEFRAME = 30 days;
+
+    mapping (uint => Transfer) public transfers;
     mapping (address => uint) private balances;
-    mapping (uint => Transfer) private transfers;
 
     function ReversibleToken(ERC20 _token) public {
         token = _token;
@@ -30,6 +36,28 @@ contract ReversibleToken is ERC20 {
     function withdraw(uint amount) external {
         balances[msg.sender] = balances[msg.sender].sub(amount);
         require(token.transfer(msg.sender, amount));
+    }
+
+    function reverse(uint transaction) external {
+        require(transfers[transaction].timestamp >= now + REVERSIBLE_TIMEFRAME);
+
+        Transfer transfer = transfers[transaction];
+
+        escrow = escrow.sub(transfer.amount);
+        balances[transfer.from] = balances[transfer.from].add(transfer.amount);
+
+        delete transfers[transaction];
+    }
+
+    function confirm(uint transaction) external {
+        require(transfers[transaction].timestamp < now + REVERSIBLE_TIMEFRAME);
+        require(!transfer[transaction].confirmed);
+
+        transfers[transaction].confirmed = true;
+
+        Transfer transfer = transfers[transaction];
+        escrow = escrow.sub(transfer.amount);
+        balances[transfer.to] = balances[transfer.to].add(transfer.amount);
     }
 
 }
