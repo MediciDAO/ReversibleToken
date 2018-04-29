@@ -24,6 +24,9 @@ contract ReversibleToken is ERC20 {
     mapping (uint => Transfer) public transfers;
     mapping (address => uint) private balances;
 
+    event Reversed(uint transaction); // @todo more info
+    event Confirmed(uint transaction);
+
     function ReversibleToken(ERC20 _token) public {
         token = _token;
     }
@@ -40,6 +43,7 @@ contract ReversibleToken is ERC20 {
 
     function reverse(uint transaction) external {
         require(transfers[transaction].timestamp >= now + REVERSIBLE_TIMEFRAME);
+        require(transfers[transaction].from == msg.sender);
 
         Transfer transfer = transfers[transaction];
 
@@ -47,6 +51,7 @@ contract ReversibleToken is ERC20 {
         balances[transfer.from] = balances[transfer.from].add(transfer.amount);
 
         delete transfers[transaction];
+        emit Reversed(transaction);
     }
 
     function confirm(uint transaction) external {
@@ -58,6 +63,7 @@ contract ReversibleToken is ERC20 {
         Transfer transfer = transfers[transaction];
         escrow = escrow.sub(transfer.amount);
         balances[transfer.to] = balances[transfer.to].add(transfer.amount);
+        emit Confirmed(transaction);
     }
 
 }
